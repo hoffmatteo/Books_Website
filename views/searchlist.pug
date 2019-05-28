@@ -1,0 +1,16 @@
+extends layout.pug
+
+block title
+    title Einkaufsliste
+
+block content
+
+
+    h1 Einkaufsliste
+
+
+    ui(class="list-group")
+        each item in list
+            li(class="list-group-item") #{item.title} by #{item.author}, #{item.year}
+            
+    

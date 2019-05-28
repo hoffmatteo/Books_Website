@@ -102,6 +102,66 @@ app.post("/register", urlencodedParser, function (req, res) {
     });
 });
 
+app.get("/logout", function (req, res) {
+    req.session.destroy(function (err) {
+        console.log("Session destroyed");
+    });
+    res.render("logout");
+});
+
+app.get("/search", function (req, res) {
+    res.render("search");
+});
+
+app.post("/searchres/:id", urlencodedParser, function (req, res) {
+    var mode = req.params.id;
+    var input = req.body.search;
+    console.log(mode);
+    if (mode == "isbn") {
+        dbClient.query("SELECT * FROM booklist WHERE isbn LIKE $1", ['%' + input + '%'], function (dbError, dbResponse) {
+            if (dbResponse.rows != 0) {
+
+
+                res.render("searchlist", {
+                    list: dbResponse.rows
+                });
+            } else {
+                res.render("search", {
+                    search_error: "Search Error, please try a different input."
+                });
+            }
+        });
+    } else if (mode == "author") {
+        dbClient.query("SELECT * FROM booklist WHERE author LIKE $1", ['%' + input + '%'], function (dbError, dbResponse) {
+            if (dbResponse.rows != 0) {
+
+
+                res.render("searchlist", {
+                    list: dbResponse.rows
+                });
+            } else {
+                res.render("search", {
+                    search_error: "Search Error, please try a different input."
+                });
+            }
+        });
+    } else {
+        dbClient.query("SELECT * FROM booklist WHERE title LIKE $1", ['%' + input + '%'], function (dbError, dbResponse) {
+            if (dbResponse.rows != 0) {
+
+
+                res.render("searchlist", {
+                    list: dbResponse.rows
+                });
+            } else {
+                res.render("search", {
+                    search_error: "Search Error, please try a different input."
+                });
+            }
+        });
+    }
+});
+
 
 app.listen(PORT, function () {
     console.log(`Shopping App listening on Port ${PORT}`);
