@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "csv-reader": "^1.0.3",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "pg": "^7.7.1",
