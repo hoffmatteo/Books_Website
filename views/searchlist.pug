@@ -11,6 +11,7 @@ block content
 
     ui(class="list-group")
         each item in list
-            li(class="list-group-item") #{item.title} by #{item.author}, #{item.year}
+            li(class="list-group-item") 
+                a(href="/book/"+item.isbn) "#{item.title}" - #{item.author}, #{item.year}
             
     

@@ -3,17 +3,17 @@ extends layout.pug
 
 block content
 
-    form(action="/searchres/isbn" method="post" class=" my-4 text-center")
+    form(action="/search/isbn" method="post" class=" my-4 text-center")
            
             input(type="search", class="form-control", id="inputSearch", placeholder="ISBN", name="search", aria-label="ISBN")
             button(type="submit", class="btn btn-outline-success my-2") Search
     
-    form(action="/searchres/author" method="post" class=" my-4 text-center")
+    form(action="/search/author" method="post" class=" my-4 text-center")
            
             input(type="search", class="form-control", id="inputSearch", placeholder="Author", name="search", aria-label="Author")
             button(type="submit", class="btn btn-outline-success my-2") Search
     
-    form(action="/searchres/title" method="post" class=" my-4 text-center")
+    form(action="/search/title" method="post" class=" my-4 text-center")
            
             input(type="search", class="form-control", id="inputSearch", placeholder="Title", name="search", aria-label="Title")
             button(type="submit", class="btn btn-outline-success my-2") Search

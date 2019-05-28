@@ -53,7 +53,7 @@ app.post("/login", urlencodedParser, function (req, res) {
             bcrypt.compare(password, dbResponse.rows[0].password, function (err, result) { //compares hash with password, result=true if passwords are identical
 
                 if (result) {
-                    req.session.username = username;
+                    req.session.user = username;
                     req.session.userID = dbResponse.rows[0].id;
                     console.log(req.session.userID);
                     res.redirect("search");
@@ -110,11 +110,18 @@ app.get("/logout", function (req, res) {
 });
 
 app.get("/search", function (req, res) {
-    res.render("search");
+    if (req.session.user != undefined) {
+
+        res.render("search");
+    } else {
+        res.render("error", {
+            error: "You need to be logged in to access this page."
+        });
+    }
 });
 
-app.post("/searchres/:id", urlencodedParser, function (req, res) {
-    var mode = req.params.id;
+app.post("/search/:mode", urlencodedParser, function (req, res) {
+    var mode = req.params.mode;
     var input = req.body.search;
     console.log(mode);
     if (mode == "isbn") {
@@ -160,6 +167,50 @@ app.post("/searchres/:id", urlencodedParser, function (req, res) {
             }
         });
     }
+
+});
+
+app.get("/book/:isbn", urlencodedParser, function (req, res) {
+    if (req.session.user != undefined) {
+
+        var isbn = req.params.isbn;
+
+        dbClient.query("SELECT * FROM booklist WHERE isbn=$1", [isbn], function (dbError, dbResponse) {
+            dbClient.query("SELECT * FROM reviewlist WHERE isbn=$1", [isbn], function (dbReviewError, dbReviewResponse) {
+
+                res.render("book", {
+                    item: dbResponse.rows[0],
+                    review_list: dbReviewResponse.rows
+                });
+            });
+        });
+    } else {
+        res.render("error", {
+            error: "You need to be logged in to access this page."
+        });
+    }
+});
+
+app.post("/book/:isbn", urlencodedParser, function (req, res) {
+    var isbn = req.params.isbn;
+    var text = req.body.textfield;
+    var rating = req.body.rating;
+    var id = req.session.userID;
+
+    console.log(id);
+    dbClient.query("INSERT INTO reviewlist (isbn, rating, text, user_id) VALUES ($1, $2, $3, $4)", [isbn, rating, text, id], function (dbError, dbResponse) {
+        console.log(dbError);
+        dbClient.query("SELECT * FROM booklist WHERE isbn=$1", [isbn], function (dbError, dbResponse) {
+            dbClient.query("SELECT * FROM reviewlist WHERE isbn=$1", [isbn], function (dbReviewError, dbReviewResponse) {
+
+                res.render("book", {
+                    item: dbResponse.rows[0],
+                    review_list: dbReviewResponse.rows
+                });
+
+            });
+        });
+    });
 });
 
 

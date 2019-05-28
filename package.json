@@ -14,6 +14,7 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "pg": "^7.7.1",
-    "pug": "^2.0.3"
+    "pug": "^2.0.3",
+    "react-star-ratings": "^2.3.0"
   }
 }

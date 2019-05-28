@@ -1,0 +1,58 @@
+extends layout.pug
+
+
+block content
+
+    h1(class="my-5") #{item.title}
+    h5 ISBN: #{item.isbn}
+    h5 Author: #{item.author}
+    h5 Released: #{item.year}
+    h3(class="my-5") Reviews
+    
+    form(action="/book/"+item.isbn method="post" class="form-signin")
+
+        div(class="form-group")
+            label(for="text") Write your own review:
+            textarea(class="form-control" id="text" rows="3" name="textfield")
+        
+        label(class="mr-5") Rating:
+        
+        div(class="form-check form-check-inline")
+            input(type='radio'  value='1' class="form-check-input" name="rating" )
+            label(class="form-check-label" for='inlineRadio1') 1
+        div(class="form-check form-check-inline")
+            input(type='radio'  value='2' class="form-check-input" name="rating")
+            label(class="form-check-label" for='inlineRadio1') 2
+        div(class="form-check form-check-inline")
+            input(type='radio'  value='3' class="form-check-input" name="rating")
+            label(class="form-check-label" for='inlineRadio1') 3
+        div(class="form-check form-check-inline")
+            input(type='radio'  value='4' class="form-check-input" name="rating")
+            label(class="form-check-label" for='inlineRadio1') 4
+        div(class="form-check form-check-inline")
+            input(type='radio'  value='5' class="form-check-input" name="rating")
+            label(class="form-check-label" for='inlineRadio1') 5
+    
+        div(class="form-group")
+            button(type="submit", class="btn btn-primary") Submit
+            
+            
+        
+        
+    ui(class="list-group")
+        each review in review_list
+            li(class="list-group-item") 
+                div(class="card")
+                    div(class="card-header font-weight-bold") Review by user##{review.user_id}:
+                
+                    div(class="card-body") 
+                        p(class="card-text") #{review.text}
+                    div(class="card-footer") Rating: #{review.rating}/5
+                
+            
+    
+    
+    
+    
+    
+    
