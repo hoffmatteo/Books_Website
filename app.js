@@ -174,13 +174,21 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
     if (req.session.user != undefined) {
 
         var isbn = req.params.isbn;
+        var avg = 0;
+
 
         dbClient.query("SELECT * FROM booklist WHERE isbn=$1", [isbn], function (dbError, dbResponse) {
             dbClient.query("SELECT * FROM reviewlist WHERE isbn=$1", [isbn], function (dbReviewError, dbReviewResponse) {
 
+                var len = dbReviewResponse.rows.length;
+                for (var i = 0; i < len; i++) {
+                    avg += dbReviewResponse.rows[i].rating;
+                }
+                avg /= len;
                 res.render("book", {
                     item: dbResponse.rows[0],
-                    review_list: dbReviewResponse.rows
+                    review_list: dbReviewResponse.rows,
+                    avg: avg
                 });
             });
         });
@@ -196,16 +204,24 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
     var text = req.body.textfield;
     var rating = req.body.rating;
     var id = req.session.userID;
+    var avg = 0;
 
     console.log(id);
     dbClient.query("INSERT INTO reviewlist (isbn, rating, text, user_id) VALUES ($1, $2, $3, $4)", [isbn, rating, text, id], function (dbError, dbResponse) {
         console.log(dbError);
         dbClient.query("SELECT * FROM booklist WHERE isbn=$1", [isbn], function (dbError, dbResponse) {
             dbClient.query("SELECT * FROM reviewlist WHERE isbn=$1", [isbn], function (dbReviewError, dbReviewResponse) {
+                var len = dbReviewResponse.rows.length;
+                for (var i = 0; i < len; i++) {
+                    avg += dbReviewResponse.rows[i].rating;
+                }
+                avg /= len;
 
+                console.log(avg);
                 res.render("book", {
                     item: dbResponse.rows[0],
-                    review_list: dbReviewResponse.rows
+                    review_list: dbReviewResponse.rows,
+                    avg: avg
                 });
 
             });
