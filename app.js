@@ -187,6 +187,8 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
                     avg += dbReviewResponse.rows[i].rating;
                 }
                 avg /= len;
+                avg = Math.round(avg * 10) / 10;
+
                 books.search(isbn, field = "isbn", function (error, results) {
                     if (!error) {
                         image = results[0].thumbnail;
@@ -209,7 +211,7 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
             error: "You need to be logged in to access this page."
         });
     }
-    return;
+
 });
 
 app.post("/book/:isbn", urlencodedParser, function (req, res) {
@@ -218,23 +220,40 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
     var rating = req.body.rating;
     var id = req.session.userID;
     var avg = 0;
+    var image;
+    var review_error = false;
+
 
     console.log(id);
     dbClient.query("INSERT INTO reviewlist (isbn, rating, text, user_id) VALUES ($1, $2, $3, $4)", [isbn, rating, text, id], function (dbError, dbResponse) {
-        console.log(dbError);
+        if (dbError) {
+            review_error = "ERROR: You already reviewed this book.";
+        }
         dbClient.query("SELECT * FROM booklist WHERE isbn=$1", [isbn], function (dbError, dbResponse) {
+
             dbClient.query("SELECT * FROM reviewlist WHERE isbn=$1", [isbn], function (dbReviewError, dbReviewResponse) {
+
                 var len = dbReviewResponse.rows.length;
                 for (var i = 0; i < len; i++) {
                     avg += dbReviewResponse.rows[i].rating;
                 }
                 avg /= len;
+                avg = Math.round(avg * 10) / 10;
 
-                console.log(avg);
-                res.render("book", {
-                    item: dbResponse.rows[0],
-                    review_list: dbReviewResponse.rows,
-                    avg: avg
+                books.search(isbn, field = "isbn", function (error, results) {
+                    if (!error) {
+                        image = results[0].thumbnail;
+
+                        res.render("book", {
+                            item: dbResponse.rows[0],
+                            review_list: dbReviewResponse.rows,
+                            avg: avg,
+                            image: image,
+                            review_error: review_error
+                        });
+                    } else {
+                        console.log(error);
+                    }
                 });
 
             });

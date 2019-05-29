@@ -41,6 +41,8 @@ block content
         div(class="form-group")
             button(type="submit", class="btn btn-primary") Submit
         p(class="font-weight-bold") Average Rating: #{avg}/5
+    if review_error
+        div(class="alert alert-danger" role="alert") #{review_error}
             
             
         
@@ -54,6 +56,7 @@ block content
                     div(class="card-body") 
                         p(class="card-text") #{review.text}
                     div(class="card-footer") Rating: #{review.rating}/5
+    
                 
             
     
