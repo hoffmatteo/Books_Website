@@ -3,11 +3,16 @@ extends layout.pug
 
 block content
 
-    h1(class="my-5") #{item.title}
+    h1(class="my-4") #{item.title}
+    img(src=""+image class="float-left mr-5")
     h5 ISBN: #{item.isbn}
+
     h5 Author: #{item.author}
     h5 Released: #{item.year}
-    h3(class="my-5") Reviews
+    div(style="clear:both;")
+        
+        
+    h3(class="my-5 float-none") Reviews
     
     form(action="/book/"+item.isbn method="post" class="form-signin")
 

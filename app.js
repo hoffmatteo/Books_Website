@@ -4,6 +4,8 @@ var bodyParser = require("body-parser");
 var session = require("express-session");
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+var books = require('google-books-search');
+
 
 var CON_STRING = process.env.DB_CON_STRING;
 if (CON_STRING == undefined) {
@@ -175,7 +177,7 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
 
         var isbn = req.params.isbn;
         var avg = 0;
-
+        var image;
 
         dbClient.query("SELECT * FROM booklist WHERE isbn=$1", [isbn], function (dbError, dbResponse) {
             dbClient.query("SELECT * FROM reviewlist WHERE isbn=$1", [isbn], function (dbReviewError, dbReviewResponse) {
@@ -185,11 +187,21 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
                     avg += dbReviewResponse.rows[i].rating;
                 }
                 avg /= len;
-                res.render("book", {
-                    item: dbResponse.rows[0],
-                    review_list: dbReviewResponse.rows,
-                    avg: avg
+                books.search(isbn, field = "isbn", function (error, results) {
+                    if (!error) {
+                        image = results[0].thumbnail;
+
+                        res.render("book", {
+                            item: dbResponse.rows[0],
+                            review_list: dbReviewResponse.rows,
+                            avg: avg,
+                            image: image
+                        });
+                    } else {
+                        console.log(error);
+                    }
                 });
+
             });
         });
     } else {
@@ -197,6 +209,7 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
             error: "You need to be logged in to access this page."
         });
     }
+    return;
 });
 
 app.post("/book/:isbn", urlencodedParser, function (req, res) {
