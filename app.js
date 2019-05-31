@@ -105,6 +105,7 @@ app.post("/register", urlencodedParser, function (req, res) {
 });
 
 app.get("/logout", function (req, res) {
+
     req.session.destroy(function (err) {
         console.log("Session destroyed");
     });
@@ -112,9 +113,13 @@ app.get("/logout", function (req, res) {
 });
 
 app.get("/search", function (req, res) {
+    var username = req.session.user;
+
     if (req.session.user != undefined) {
 
-        res.render("search");
+        res.render("search", {
+            username: username
+        });
     } else {
         res.render("error", {
             error: "You need to be logged in to access this page."
@@ -125,6 +130,8 @@ app.get("/search", function (req, res) {
 app.post("/search/:mode", urlencodedParser, function (req, res) {
     var mode = req.params.mode;
     var input = req.body.search;
+    var username = req.session.user;
+
     console.log(mode);
     if (mode == "isbn") {
         dbClient.query("SELECT * FROM booklist WHERE isbn LIKE $1", ['%' + input + '%'], function (dbError, dbResponse) {
@@ -132,11 +139,13 @@ app.post("/search/:mode", urlencodedParser, function (req, res) {
 
 
                 res.render("searchlist", {
-                    list: dbResponse.rows
+                    list: dbResponse.rows,
+                    username: username
                 });
             } else {
                 res.render("search", {
-                    search_error: "Search Error, please try a different input."
+                    search_error: "Search Error, please try a different input.",
+                    username: username
                 });
             }
         });
@@ -146,11 +155,13 @@ app.post("/search/:mode", urlencodedParser, function (req, res) {
 
 
                 res.render("searchlist", {
-                    list: dbResponse.rows
+                    list: dbResponse.rows,
+                    username: username
                 });
             } else {
                 res.render("search", {
-                    search_error: "Search Error, please try a different input."
+                    search_error: "Search Error, please try a different input.",
+                    username: username
                 });
             }
         });
@@ -160,11 +171,13 @@ app.post("/search/:mode", urlencodedParser, function (req, res) {
 
 
                 res.render("searchlist", {
-                    list: dbResponse.rows
+                    list: dbResponse.rows,
+                    username: username
                 });
             } else {
                 res.render("search", {
-                    search_error: "Search Error, please try a different input."
+                    search_error: "Search Error, please try a different input.",
+                    username: username
                 });
             }
         });
@@ -178,6 +191,7 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
         var isbn = req.params.isbn;
         var avg = 0;
         var image;
+        var username = req.session.user;
 
         dbClient.query("SELECT * FROM booklist WHERE isbn=$1", [isbn], function (dbError, dbResponse) {
             dbClient.query("SELECT * FROM reviewlist WHERE isbn=$1", [isbn], function (dbReviewError, dbReviewResponse) {
@@ -189,15 +203,16 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
                 avg /= len;
                 avg = Math.round(avg * 10) / 10;
 
-                books.search(isbn, field = "isbn", function (error, results) {
+                books.search(isbn, field = "isbn", function (error, results) { //returns array of "image-objects"
                     if (!error) {
                         image = results[0].thumbnail;
 
                         res.render("book", {
-                            item: dbResponse.rows[0],
-                            review_list: dbReviewResponse.rows,
+                            item: dbResponse.rows[0], //book itself
+                            review_list: dbReviewResponse.rows, //reviews
                             avg: avg,
-                            image: image
+                            image: image,
+                            username: username
                         });
                     } else {
                         console.log(error);
@@ -222,34 +237,46 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
     var avg = 0;
     var image;
     var review_error = false;
+    var username = req.session.user;
+
+
+
 
 
     console.log(id);
     dbClient.query("INSERT INTO reviewlist (isbn, rating, text, user_id) VALUES ($1, $2, $3, $4)", [isbn, rating, text, id], function (dbError, dbResponse) {
         if (dbError) {
-            review_error = "ERROR: You already reviewed this book.";
+            if (rating == undefined) {
+                review_error = "ERROR: Please submit a rating."
+            } else {
+                review_error = "ERROR: You already reviewed this book."; //Primary Key user_id, isbn --> Error when user tries to submit two reviews for one book
+            }
         }
         dbClient.query("SELECT * FROM booklist WHERE isbn=$1", [isbn], function (dbError, dbResponse) {
 
             dbClient.query("SELECT * FROM reviewlist WHERE isbn=$1", [isbn], function (dbReviewError, dbReviewResponse) {
 
                 var len = dbReviewResponse.rows.length;
+
                 for (var i = 0; i < len; i++) {
                     avg += dbReviewResponse.rows[i].rating;
                 }
                 avg /= len;
                 avg = Math.round(avg * 10) / 10;
 
-                books.search(isbn, field = "isbn", function (error, results) {
+
+
+                books.search(isbn, field = "isbn", function (error, results) { //returns array of "image-objects"
                     if (!error) {
                         image = results[0].thumbnail;
 
                         res.render("book", {
-                            item: dbResponse.rows[0],
-                            review_list: dbReviewResponse.rows,
+                            item: dbResponse.rows[0], //book itself
+                            review_list: dbReviewResponse.rows, //reviews
                             avg: avg,
                             image: image,
-                            review_error: review_error
+                            review_error: review_error,
+                            username: username
                         });
                     } else {
                         console.log(error);
@@ -259,6 +286,7 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
             });
         });
     });
+
 });
 
 
