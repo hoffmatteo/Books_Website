@@ -203,19 +203,53 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
                 avg /= len;
                 avg = Math.round(avg * 10) / 10;
 
-                books.search(isbn, field = "isbn", function (error, results) { //returns array of "image-objects"
-                    if (!error) {
-                        image = results[0].thumbnail;
 
+
+                books.search(isbn, field = "isbn", function (error, results) { //returns array of "image-objects", but: search error, or some books don't have a thumbnail, or the isbn is different/can't be found    --> 3x if/else 
+
+                    if (!error) {
+                        if (results != undefined) {
+
+
+                            console.log(results);
+
+                            image = results[0].thumbnail;
+
+
+                            if (image != undefined) {
+                                res.render("book", {
+                                    item: dbResponse.rows[0], //book itself
+                                    review_list: dbReviewResponse.rows, //reviews
+                                    avg: avg,
+                                    image: image,
+                                    username: username
+                                });
+                            } else {
+                                res.render("book", {
+                                    item: dbResponse.rows[0], //book itself
+                                    review_list: dbReviewResponse.rows, //reviews
+                                    avg: avg,
+                                    image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
+                                    username: username
+                                });
+                            }
+                        } else {
+                            res.render("book", {
+                                item: dbResponse.rows[0], //book itself
+                                review_list: dbReviewResponse.rows, //reviews
+                                avg: avg,
+                                image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
+                                username: username
+                            });
+                        }
+                    } else {
                         res.render("book", {
                             item: dbResponse.rows[0], //book itself
                             review_list: dbReviewResponse.rows, //reviews
                             avg: avg,
-                            image: image,
+                            image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
                             username: username
                         });
-                    } else {
-                        console.log(error);
                     }
                 });
 
