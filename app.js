@@ -205,10 +205,10 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
 
 
 
-                books.search(isbn, field = "isbn", function (error, results) { //returns array of "image-objects", but: search error, or some books don't have a thumbnail, or the isbn is different/can't be found    --> 3x if/else 
+                books.search(isbn, field = "isbn", function (error, results) { //returns array of "image-objects", but: search error, or some books don't have a thumbnail, or the isbn is different/can't be found for example: Contact - Carl Sagan --> different isbn on Google Books
 
                     if (!error) {
-                        if (results != undefined) {
+                        if (results[0] != undefined) {
 
 
                             console.log(results);
@@ -224,35 +224,19 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
                                     image: image,
                                     username: username
                                 });
-                            } else {
-                                res.render("book", {
-                                    item: dbResponse.rows[0], //book itself
-                                    review_list: dbReviewResponse.rows, //reviews
-                                    avg: avg,
-                                    image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
-                                    username: username
-                                });
-                            }
-                        } else {
-                            res.render("book", {
-                                item: dbResponse.rows[0], //book itself
-                                review_list: dbReviewResponse.rows, //reviews
-                                avg: avg,
-                                image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
-                                username: username
-                            });
-                        }
-                    } else {
-                        res.render("book", {
-                            item: dbResponse.rows[0], //book itself
-                            review_list: dbReviewResponse.rows, //reviews
-                            avg: avg,
-                            image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
-                            username: username
-                        });
-                    }
-                });
 
+                            }
+                        }
+
+                    }
+                    res.render("book", { //if there's an error with the search, a default image will be used
+                        item: dbResponse.rows[0], //book itself
+                        review_list: dbReviewResponse.rows, //reviews
+                        avg: avg,
+                        image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
+                        username: username
+                    });
+                });
             });
         });
     } else {
@@ -262,6 +246,17 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
     }
 
 });
+
+function default_image(item, review_list, avg, username, res) {
+    res.render("book", {
+        item: dbResponse.rows[0], //book itself
+        review_list: dbReviewResponse.rows, //reviews
+        avg: avg,
+        image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
+        username: username
+    });
+}
+
 
 app.post("/book/:isbn", urlencodedParser, function (req, res) {
     var isbn = req.params.isbn;
@@ -321,6 +316,25 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
         });
     });
 
+});
+
+
+app.get("/myreviews", urlencodedParser, function (req, res) {
+    if (req.session.user != undefined) {
+        var userID = req.session.userID;
+        var username = req.session.user;
+        dbClient.query("SELECT * FROM reviewlist WHERE user_id=$1", [userID], function (dbError, dbReponse) {
+            res.render("myreviews", {
+                reviewlist: dbReponse.rows,
+                username: username
+            });
+        });
+    } else {
+        res.render("error", {
+            error: "You need to be logged in to access this page."
+
+        })
+    }
 });
 
 

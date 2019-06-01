@@ -1,0 +1,22 @@
+
+
+extends layout.pug
+
+            
+block navbar
+    img(src="https://www.shareicon.net/data/128x128/2016/09/01/822711_user_512x512.png" width="30" height="30" class="d-inline-block align-top mx-2" alt="")
+    span(class="navbar-text text-white ") #{username}
+
+
+block content
+
+    ui(class="list-group")
+        each review in reviewlist
+            li(class="list-group-item") 
+                div(class="card")
+                    div(class="card-header font-weight-bold") 
+                        a(href="/book/"+review.isbn) Review by user##{review.user_id}:
+                
+                    div(class="card-body") 
+                        p(class="card-text") #{review.text}
+                    div(class="card-footer") Rating: #{review.rating}/5
