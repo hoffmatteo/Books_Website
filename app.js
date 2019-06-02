@@ -7,6 +7,8 @@ const saltRounds = 10;
 var books = require('google-books-search');
 
 
+
+
 var CON_STRING = process.env.DB_CON_STRING;
 if (CON_STRING == undefined) {
     console.log("Error: Environment variable DB_CON_STRING not set!");
@@ -30,6 +32,7 @@ app.use(session({
     resave: true,
     saveUninitialized: false
 }));
+app.use(express.static(__dirname + '/public'));
 
 app.set("views", "views");
 app.set("view engine", "pug");
@@ -247,15 +250,7 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
 
 });
 
-function default_image(item, review_list, avg, username, res) {
-    res.render("book", {
-        item: dbResponse.rows[0], //book itself
-        review_list: dbReviewResponse.rows, //reviews
-        avg: avg,
-        image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
-        username: username
-    });
-}
+
 
 
 app.post("/book/:isbn", urlencodedParser, function (req, res) {
@@ -295,21 +290,36 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
 
 
 
-                books.search(isbn, field = "isbn", function (error, results) { //returns array of "image-objects"
+                books.search(isbn, field = "isbn", function (error, results) { //returns array of "image-objects" , but: search error, or some books don't have a thumbnail, or the isbn is different/can't be found for example: Contact - Carl Sagan --> different isbn on Google Books
                     if (!error) {
-                        image = results[0].thumbnail;
+                        if (results[0] != undefined) {
 
-                        res.render("book", {
-                            item: dbResponse.rows[0], //book itself
-                            review_list: dbReviewResponse.rows, //reviews
-                            avg: avg,
-                            image: image,
-                            review_error: review_error,
-                            username: username
-                        });
-                    } else {
-                        console.log(error);
+
+                            console.log(results);
+
+                            image = results[0].thumbnail;
+
+
+                            if (image != undefined) {
+                                res.render("book", {
+                                    item: dbResponse.rows[0], //book itself
+                                    review_list: dbReviewResponse.rows, //reviews
+                                    avg: avg,
+                                    image: image,
+                                    username: username
+                                });
+
+                            }
+                        }
+
                     }
+                    res.render("book", { //if there's an error with the search, a default image will be used
+                        item: dbResponse.rows[0], //book itself
+                        review_list: dbReviewResponse.rows, //reviews
+                        avg: avg,
+                        image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
+                        username: username
+                    });
                 });
 
             });
@@ -335,6 +345,10 @@ app.get("/myreviews", urlencodedParser, function (req, res) {
 
         })
     }
+});
+
+app.get("/logintest", function (req, res) {
+    res.render("logintest");
 });
 
 
