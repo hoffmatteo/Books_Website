@@ -130,9 +130,9 @@ app.get("/search", function (req, res) {
     }
 });
 
-app.post("/search/:mode", urlencodedParser, function (req, res) {
-    var mode = req.params.mode;
+app.post("/search/result", urlencodedParser, function (req, res) {
     var input = req.body.search;
+    var mode = req.body.mode;
     var username = req.session.user;
 
     console.log(mode);
@@ -169,6 +169,7 @@ app.post("/search/:mode", urlencodedParser, function (req, res) {
             }
         });
     } else {
+
         dbClient.query("SELECT * FROM booklist WHERE title LIKE $1", ['%' + input + '%'], function (dbError, dbResponse) {
             if (dbResponse.rows != 0) {
 
@@ -227,6 +228,7 @@ app.get("/book/:isbn", urlencodedParser, function (req, res) {
                                     image: image,
                                     username: username
                                 });
+                                return;
 
                             }
                         }
@@ -271,7 +273,7 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
     dbClient.query("INSERT INTO reviewlist (isbn, rating, text, user_id) VALUES ($1, $2, $3, $4)", [isbn, rating, text, id], function (dbError, dbResponse) {
         if (dbError) {
             if (rating == undefined) {
-                review_error = "ERROR: Please submit a rating."
+                review_error = "ERROR: Rating is missing.";
             } else {
                 review_error = "ERROR: You already reviewed this book."; //Primary Key user_id, isbn --> Error when user tries to submit two reviews for one book
             }
@@ -306,8 +308,11 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
                                     review_list: dbReviewResponse.rows, //reviews
                                     avg: avg,
                                     image: image,
-                                    username: username
+                                    username: username,
+                                    review_error: review_error
+
                                 });
+                                return;
 
                             }
                         }
@@ -318,7 +323,8 @@ app.post("/book/:isbn", urlencodedParser, function (req, res) {
                         review_list: dbReviewResponse.rows, //reviews
                         avg: avg,
                         image: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/book-cover-flyer-template-6bd8f9188465e443a5e161a7d0b3cf33_screen.jpg?ts=1456287935", //default image if thumbnail can't be found
-                        username: username
+                        username: username,
+                        review_error: review_error
                     });
                 });
 

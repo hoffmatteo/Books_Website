@@ -7,21 +7,23 @@ block navbar
 
 
 block content
+   
+    form(action="/search/result" method="post" class="my-4 mx-3")
+        label(for="sel1" class="mr-3") Options:
 
-    form(action="/search/isbn" method="post" class=" my-4 text-center")
+        div(class="row")
+
+            div(class="form-group")
+                select(class="form-control" id="sel1" name="mode")
+                    option isbn
+                    option author
+                    option title
            
-            input(type="search", class="form-control", id="inputSearch", placeholder="ISBN", name="search", aria-label="ISBN")
-            button(type="submit", class="btn btn-outline-success my-2") Search
-    
-    form(action="/search/author" method="post" class=" my-4 text-center")
-           
-            input(type="search", class="form-control", id="inputSearch", placeholder="Author", name="search", aria-label="Author")
-            button(type="submit", class="btn btn-outline-success my-2") Search
-    
-    form(action="/search/title" method="post" class=" my-4 text-center")
-           
-            input(type="search", class="form-control", id="inputSearch", placeholder="Title", name="search", aria-label="Title")
-            button(type="submit", class="btn btn-outline-success my-2") Search
-    
+            input(type="search", class="form-control col mx-1", id="inputSearch", placeholder="Title", name="search", aria-label="Title")
+            button(type="submit", class="btn btn-outline-success col-md-2 mx-1") Search
     if search_error
         div(class="alert alert-danger" role="alert") #{search_error}
+   
+ 
+            
+
