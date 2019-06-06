@@ -9,17 +9,17 @@ block navbar
 block content
    
     form(action="/search/result" method="post" class="my-4 mx-3")
-        label(for="sel1" class="mr-3") Options:
+        label(for="search_mode" class="mr-3 text-muted") Options:
 
         div(class="row")
 
             div(class="form-group")
-                select(class="form-control" id="sel1" name="mode")
+                select(class="form-control" id="search_mode" name="mode")
                     option isbn
                     option author
                     option title
            
-            input(type="search", class="form-control col mx-1", id="inputSearch", placeholder="Title", name="search", aria-label="Title")
+            input(type="search", class="form-control col mx-1", id="inputSearch", placeholder="Please enter your search request here", name="search", aria-label="Please enter your search request here")
             button(type="submit", class="btn btn-outline-success col-md-2 mx-1") Search
     if search_error
         div(class="alert alert-danger" role="alert") #{search_error}

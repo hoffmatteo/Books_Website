@@ -340,24 +340,32 @@ app.get("/myreviews", urlencodedParser, function (req, res) {
         var userID = req.session.userID;
         var username = req.session.user;
         dbClient.query("SELECT * FROM reviewlist WHERE user_id=$1", [userID], function (dbError, dbReponse) {
-            res.render("myreviews", {
-                reviewlist: dbReponse.rows,
-                username: username
-            });
+            if (dbReponse.rows.length != 0) {
+                res.render("myreviews", {
+                    reviewlist: dbReponse.rows,
+                    username: username
+                });
+            } else {
+                res.render("error", {
+                    error: "You haven't written a review yet."
+                });
+            }
         });
+
+
     } else {
         res.render("error", {
             error: "You need to be logged in to access this page."
 
-        })
+        });
     }
 });
 
-app.get("/logintest", function (req, res) {
-    res.render("logintest");
-});
+
+
+
 
 
 app.listen(PORT, function () {
-    console.log(`Shopping App listening on Port ${PORT}`);
+    console.log(`Book App listening on Port ${PORT}`);
 });
