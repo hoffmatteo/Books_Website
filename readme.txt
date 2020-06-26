@@ -3,3 +3,8 @@ URI: postgres://hrtebsxltnonae:ceb917ba8b0eb07ebda71a36791b1024e2e6d6a054ba73dd8
 
 username: test
 password: test
+
+Project for University from 2019:
+
+Website accessing Google Books API to create interface to see and review books.
+Uses Node.js and allows users to create accounts.
